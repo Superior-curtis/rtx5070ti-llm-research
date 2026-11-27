@@ -1,0 +1,4 @@
+{"source_row":1,"contextRecordCount":0,"wallSec":15.7,"ttftSec":0.66,"serverTokS":135.9,"streamTokS":136.1,"outputTokens":2048,"promptTokens":80,"responseChars":11319,"reasonChars":0,"finish":"length"}
+{"source_row":2,"contextRecordCount":0,"wallSec":14.78,"ttftSec":0.07,"serverTokS":139.1,"streamTokS":139.24,"outputTokens":2048,"promptTokens":80,"responseChars":12097,"reasonChars":0,"finish":"length"}
+{"source_row":3,"contextRecordCount":140,"wallSec":17.01,"ttftSec":2.24,"serverTokS":138.6,"streamTokS":138.75,"outputTokens":2048,"promptTokens":7500,"responseChars":12258,"reasonChars":0,"finish":"length"}
+{"source_row":4,"contextRecordCount":580,"wallSec":22.05,"ttftSec":8.44,"serverTokS":142.3,"streamTokS":142.49,"outputTokens":1940,"promptTokens":30820,"responseChars":10861,"reasonChars":0,"finish":"length"}
