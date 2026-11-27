@@ -102,4 +102,17 @@ Swift 的 8 題較難推理子測試中，256 thinking budget 得 5/8，而 1,02
 | 智慧、推理預算、Agent 與 Vision | [Model evaluation](docs/model-evaluation.md) | [Benchmark CSV](benchmarks.csv) |
 | 系統架構 | [System architecture](docs/system-architecture.md) | [Methodology](METHODOLOGY.md) |
 
-本版本提供彙整數據、研究方法及結果分析。尚未公開經過審查的全部原始日誌、測試 harness 和第三方模型權重，因此不能稱為完全可重現的研究套件。引用時請附上 Git commit 版本。
+## 06 — 研究數據與重現工具
+
+本版本已從六份歷史 JSONL 原始紀錄抽取並公開 **155 筆逐次測試數據**，保留數值精度、token 數、延遲、速度、正確性等欄位，排除私人資訊及完整題目與回答。
+
+| 資源 | 說明 |
+|---|---|
+| [逐次測試數據](data/trials/README.md) | NInfer、Strata、MTP 與 Swift 推理測試 |
+| [引擎及模型版本](docs/runtime-manifest.md) | 已記錄的版本、模型 revision 和 SHA-256 |
+| [實驗重現指南](reproduce/README.md) | Python 參考測速工具與公平比較方式 |
+| [Python 程式](reproduce/benchmark.py) | 本地串流 API、合成長上下文回想與生成 |
+
+已重新從公開 JSONL 計算並確認 130.26 tok/s 中位數與 Swift 推理分數。新測速程式已在實驗桌機通過離線自我測試，但尚未連接實際模型執行完整實驗。
+
+這不是所有未經篩選的原始日誌，也不是歷史測試程式的完全複製；仍需補上其他實驗資料及精確版本，才能達到全面獨立重現。引用時請附上 Git commit 版本。
