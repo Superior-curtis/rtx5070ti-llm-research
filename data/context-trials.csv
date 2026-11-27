@@ -1,0 +1,19 @@
+engine,quantization,task,input_tokens,cached_tokens,output_tokens,decode_toks_per_s,ttft_s,wall_s,cache_state,result
+NInfer,IQ3_S,marker recall default,125813,0,270,120.79,85.30,87.54,cold,3/3 markers
+NInfer,IQ3_S,generation default,125833,121856,1024,110.48,3.66,12.93,warm,no visible final answer
+NInfer,IQ3_S,marker recall budget256,125771,0,206,147.29,85.62,87.03,cold,3/3 markers
+NInfer,IQ3_S,refactor budget256,125791,121856,1024,136.95,3.57,11.05,warm,visible answer
+NInfer,IQ3_S,refactor plan,125783,0,2048,123.81,85.46,102.01,cold,visible answer
+NInfer,IQ3_S,code review,125778,121856,2048,130.26,3.57,19.30,warm,visible answer
+NInfer,IQ3_S,regression tests,125779,121856,2048,164.45,3.52,15.98,warm,visible answer
+Strata,IQ2_XS,128K recall,120707,,45,137.3,37.07,,cold,3/3 markers
+Strata,IQ2_XS,128K generation,120706,,2048,134.8,8.18,,partial reuse,completed
+Strata,IQ2_XS,256K recall,241232,,45,130.2,78.72,,cold,3/3 markers
+Strata,IQ2_XS,256K generation,241231,,1732,134.3,9.20,,warm,completed
+Strata,IQ3_S,128K recall,120707,,,82.6,36.27,,cold,3/3 markers
+Strata,IQ3_S,256K recall,230597,,,84.6,73.24,,cold,3/3 markers
+Strata,IQ3_S,256K generation,230596,,,99.1,5.99,,warm,unscored quality
+Swift,,near-1M retest,985092,985087,111,,,2.0,warm,exact marker
+Stock CUDA,IQ3_S,64K recall,62926,,39,101.64,53.04,,cold,3/3 markers
+Stock CUDA,IQ3_S,64K generation,62950,62670,1024,78.14,0.51,,warm,completed
+AdaptiveKV,IQ4_XS,128K recall,125765,,203,30.44,293.28,,cold,3/3 markers
