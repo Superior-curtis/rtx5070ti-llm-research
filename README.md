@@ -25,7 +25,7 @@ Can a single consumer GPU with 16 GB of VRAM support high-speed local language-m
 The starting baseline was approximately 10.8 decode tokens/s on LM Studio Q4_K_M in the synthetic comparison. Subsequent experiments with alternative model architectures and runtimes exceeded 100 tokens/s at 125K-class inputs, and selected cached workloads exceeded 230K input tokens. The final general-purpose configuration was chosen for its observed quality-throughput balance rather than headline speed alone.
 
 > [!IMPORTANT]
-> This is an independent experimental report, not a model release, official leaderboard, or claim of equivalence to commercial frontier models. The published data are transcribed aggregates from historical experiment summaries. Runtime, architecture, cache conditions and output lengths differ across some configurations.
+> This is an independent experimental report, not a model release, official leaderboard, or claim of equivalence to commercial frontier models. The published data include historical aggregate summaries and 155 allowlisted per-trial metric records extracted directly from six original JSONL logs. Runtime, architecture, cache conditions and output lengths differ across some configurations.
 
 ## Research highlights
 
@@ -36,6 +36,26 @@ The starting baseline was approximately 10.8 decode tokens/s on LM Studio Q4_K_M
 | Near-1M context retrieval | **985,092 tokens** | Warm-cache exact-marker result; not a cold 1M throughput benchmark |
 | Matched MMLU-Pro subset | **66/70** | Strata IQ3_S, 94.3% on the fixed 70 questions |
 | Coding-agent reproduction | **28/29** | Local QuixBugs repair result, 206 seconds |
+
+## Reproducibility release
+
+**155 per-trial records · 6 historical log extracts · original reference harness**
+
+| Resource | What it provides |
+|---|---|
+| [Historical per-trial metrics](data/trials/README.md) | Six JSONL extracts with original numerical precision, token counts, timing, correctness, and selected termination metadata |
+| [Runtime and model manifest](docs/runtime-manifest.md) | Recorded engine versions, quantization/context settings, and the NInfer model revision and SHA-256 |
+| [Run the benchmark](reproduce/README.md) | A dependency-free Python reference harness for local streaming APIs, synthetic retrieval and generation |
+| [Benchmark source](reproduce/benchmark.py) | Original reference implementation; offline self-test passed on the experiment PC |
+
+```bash
+python reproduce/benchmark.py --self-test
+python reproduce/benchmark.py --model YOUR_LOCAL_MODEL_ID --task recall --records 100 --repeat 2
+```
+
+**Audit:** rereading the public JSONL files reproduces the 130.26 tok/s median across three long NInfer generations, the 17/17/18/18 correct counts across the four 24-question reasoning-effort groups, and the 5/7/7 correct counts across the three eight-question thinking-budget groups. The reference harness has passed offline checks; a live endpoint test has not yet been performed.
+
+The six extracts retain selected measurement fields, not complete original prompts or model outputs. The new harness demonstrates the method and is not an exact copy of the historical runner.
 
 ## Explore the research
 
@@ -137,15 +157,17 @@ The project evolved toward a single-GPU service with an OpenAI-compatible API, m
 
 A single 16 GB consumer GPU can achieve sustained generation above 100 tokens/s at 128K-class inputs under selected workloads, and some configurations support substantially longer contexts. Decode throughput alone does not describe perceived latency: cold prefill can take over a minute. Lower precision, model architecture, runtime and cache behavior all affect the result. The chosen general-purpose configuration was Strata IQ3_S, not necessarily the fastest configuration.
 
-No equivalence to GPT or Claude is claimed. These are local experimental results, not official benchmark scores. Raw logs and third-party weights are not included in this initial publication; the aggregate data is transcribed from historical experiment summaries.
+No equivalence to GPT or Claude is claimed. These are local experimental results, not official benchmark scores. Unfiltered raw logs and third-party weights are not distributed. Aggregate data is transcribed from historical summaries, with selected per-trial numeric and boolean measurements now available in six sanitized JSONL extracts.
 
 ## Reproducibility roadmap
 
 - [x] Publish aggregate quality and throughput data with sample denominators.
 - [x] Separate cold and warm long-context trials, including unsuccessful output generation.
 - [x] Document runtime versions, reasoning budgets, observed regressions and source manifest.
-- [ ] Release reviewed, per-trial raw logs and exact model revisions.
-- [ ] Publish an independently runnable benchmark harness with matched workloads.
+- [x] Release six reviewed per-trial metric extracts (155 records) and the available runtime/model revision manifest.
+- [ ] Expand coverage to remaining historical experiments and independently verifiable model revisions.
+- [x] Publish a new reference benchmark harness and pass its offline self-test.
+- [ ] Run live endpoint validation and release an exact historical prompt/runner reproduction where redistribution permits.
 - [ ] Complete cold near-1M testing, multi-user load tests and frontend integration verification.
 
 Researchers interested in replication should report model architecture, quantization, runtime build, actual input/output token counts, cache state, decode throughput, TTFT and answer correctness separately. Do not compare an output-only speed against another system's end-to-end rate.
@@ -165,12 +187,17 @@ Researchers interested in replication should report model architecture, quantiza
 │   └── context-latency.svg
 ├── data/
 │   ├── context-trials.csv
-│   └── mtp-sweep.csv
+│   ├── mtp-sweep.csv
+│   └── trials/             # six JSONL extracts and provenance
+├── reproduce/
+│   ├── README.md
+│   └── benchmark.py
 └── docs/
     ├── inference-optimization.md
     ├── long-context.md
     ├── model-evaluation.md
-    └── system-architecture.md
+    ├── system-architecture.md
+    └── runtime-manifest.md
 ```
 
 ## Citation
