@@ -1,16 +1,61 @@
-# Beyond 16GB: High-Speed Local LLM Inference on a Single RTX 5070 Ti
+<p align="center">
+  <img src="assets/hero.svg" alt="Beyond 16 GB — RTX 5070 Ti research: 130.26 decode tokens/s at 125K input, 241K warm input, and 66/70 on the MMLU-Pro subset" width="100%">
+</p>
 
-An independent experimental study of local language-model inference, quantization, long-context memory management, coding agents, and single-GPU serving. Experiments conducted in November 2026. This is a research report, not a new model release or an official leaderboard.
+<h1 align="center">Beyond 16GB</h1>
+<p align="center"><b>High-speed local LLM inference on a single RTX 5070 Ti</b></p>
+<p align="center">Independent experimental research · November 2026</p>
 
-[繁體中文](README.zh-TW.md) · [Benchmark data](benchmarks.csv) · [Methodology](METHODOLOGY.md)
+<p align="center">
+  <img alt="GPU: RTX 5070 Ti" src="https://img.shields.io/badge/GPU-RTX%205070%20Ti-76B900">
+  <img alt="VRAM: 16 GB" src="https://img.shields.io/badge/VRAM-16%20GB-334155">
+  <img alt="OS: Windows 11" src="https://img.shields.io/badge/OS-Windows%2011-0078D4">
+  <img alt="Research: experimental" src="https://img.shields.io/badge/Research-Experimental-64748B">
+</p>
+<p align="center">
+  <a href="README.zh-TW.md">繁體中文</a> · <a href="METHODOLOGY.md">Methodology</a> · <a href="benchmarks.csv">Benchmark CSV</a> · <a href="data/context-trials.csv">Context trials</a> · <a href="https://huggingface.co/datasets/Whatever0625/rtx5070ti-llm-benchmarks">Hugging Face (dataset pending upload)</a>
+</p>
 
-## Highlights
+---
 
-- **130.26 tokens/s median decode** across three 2,048-token generations at approximately 125K input tokens using Swift IQ3_S and NInfer (one cold and two cached requests).
-- **134.3 tokens/s** at 241,231 input tokens using Strata IQ2_XS, with 1,732 generated tokens and a reused prefix.
-- **985,092 input tokens** in a successful warm-cache retrieval test; this is not a cold 1M-context throughput result.
-- **66/70 MMLU-Pro** and **22/30 AIME** on fixed public subsets using Strata IQ3_S.
-- **28/29 QuixBugs repairs** using Swift/NInfer in a reproduction of a published coding experiment.
+## Abstract
+
+Can a single consumer GPU with 16 GB of VRAM support high-speed local language-model inference while preserving useful reasoning quality and accommodating unusually long input sequences? This project explores that question through a series of local experiments covering quantization, speculative decoding, KV-cache memory management, long-context retrieval, coding agents, and serving infrastructure.
+
+The starting baseline was approximately 10.8 decode tokens/s on LM Studio Q4_K_M in the synthetic comparison. Subsequent experiments with alternative model architectures and runtimes exceeded 100 tokens/s at 125K-class inputs, and selected cached workloads exceeded 230K input tokens. The final general-purpose configuration was chosen for its observed quality-throughput balance rather than headline speed alone.
+
+> [!IMPORTANT]
+> This is an independent experimental report, not a model release, official leaderboard, or claim of equivalence to commercial frontier models. The published data are transcribed aggregates from historical experiment summaries. Runtime, architecture, cache conditions and output lengths differ across some configurations.
+
+## Research highlights
+
+| Measured outcome | Result | Interpretation |
+|---|---:|---|
+| Sustained long output, ~125K input | **130.26 tok/s** | Median of three 2,048-token Swift/NInfer generations; one cold, two warm |
+| ~241K input generation | **134.3 tok/s** | Strata IQ2_XS, reused prefix, 1,732 generated tokens |
+| Near-1M context retrieval | **985,092 tokens** | Warm-cache exact-marker result; not a cold 1M throughput benchmark |
+| Matched MMLU-Pro subset | **66/70** | Strata IQ3_S, 94.3% on the fixed 70 questions |
+| Coding-agent reproduction | **28/29** | Local QuixBugs repair result, 206 seconds |
+
+## Explore the research
+
+| Research area | Detailed report | Supporting data |
+|---|---|---|
+| Inference optimization | [Engine comparisons, MTP sweeps and memory constraints](docs/inference-optimization.md) | [MTP sweep CSV](data/mtp-sweep.csv) |
+| Long-context inference | [128K, 256K and near-1M trials](docs/long-context.md) | [Context trial CSV](data/context-trials.csv) |
+| Model intelligence and coding | [Quality, reasoning budgets, agents and vision](docs/model-evaluation.md) | [Aggregate benchmark CSV](benchmarks.csv) |
+| Serving infrastructure | [Architecture and integration status](docs/system-architecture.md) | [Methodology](METHODOLOGY.md) |
+
+## Experimental progression
+
+| Phase | Research question | Outcome |
+|---|---|---|
+| Baseline | How fast is the original Q4 model? | Established a slow reference configuration; identified performance constraints |
+| Adaptive KV / stock CUDA | Can cache management and MTP improve inference? | Short and medium prompts exceeded 100 tok/s; stock 128K prefill failed |
+| NInfer / Swift | Can ~125K input fit and sustain long generation? | Three 2,048-output trials completed at 123.81–164.45 tok/s |
+| Strata / quantization sweep | Which configuration offers the best local speed-quality trade-off? | IQ3_S selected; IQ2_XS was faster but answered fewer matched MMLU questions |
+| Basalt and further validation | Is another engine a better deployment candidate? | Basalt completed matched quality subsets and ~94.4 tok/s median synthetic generation |
+| Serving and extended context | Can the system serve real applications and handle near-1M inputs? | Warm-cache retrieval succeeded; some 1M speculation presets failed and were restored |
 
 ## Hardware
 
@@ -22,6 +67,8 @@ An independent experimental study of local language-model inference, quantizatio
 | OS | Windows 11 |
 
 ## 1. Quantization and engine comparison
+
+<p align="center"><img src="assets/throughput.svg" alt="Horizontal bar chart comparing local decode throughput for ten configurations" width="100%"></p>
 
 | Configuration | Synthetic decode (tokens/s) | GPQA | AIME | MMLU-Pro | MATH |
 |---|---:|---:|---:|---:|---:|
@@ -38,7 +85,13 @@ An independent experimental study of local language-model inference, quantizatio
 
 These results combine different architectures, context settings, and output lengths (512 or 2,048 tokens); Basalt is the median of four 2,048-token trials. Incomplete subsets are not comparable to completed subsets as official scores. The full-coverage Strata IQ3_S configuration was selected for its measured speed/quality trade-off rather than maximum raw throughput. On the same 70 MMLU-Pro questions, IQ3_S answered eight more correctly than IQ2_XS (paired exact McNemar p=0.0078, exploratory single-run comparison).
 
+<p align="center"><img src="assets/quality.svg" alt="Matched Strata GPQA, AIME, MMLU-Pro and MATH sample results by quantization" width="100%"></p>
+
+The data motivate a practical choice: IQ3_S is slower than IQ2_XS on this synthetic speed suite, but it answers eight additional MMLU-Pro questions and four additional AIME questions correctly. Neither quantization is proven superior across all tasks.
+
 ## 2. Long-context experiments
+
+<p align="center"><img src="assets/context-latency.svg" alt="Cold versus warm time to first token in selected Swift and Strata experiments" width="100%"></p>
 
 | Configuration | Actual input tokens | Output tokens | Decode tok/s | TTFT (s) | Cache |
 |---|---:|---:|---:|---:|---|
@@ -85,6 +138,44 @@ The project evolved toward a single-GPU service with an OpenAI-compatible API, m
 A single 16 GB consumer GPU can achieve sustained generation above 100 tokens/s at 128K-class inputs under selected workloads, and some configurations support substantially longer contexts. Decode throughput alone does not describe perceived latency: cold prefill can take over a minute. Lower precision, model architecture, runtime and cache behavior all affect the result. The chosen general-purpose configuration was Strata IQ3_S, not necessarily the fastest configuration.
 
 No equivalence to GPT or Claude is claimed. These are local experimental results, not official benchmark scores. Raw logs and third-party weights are not included in this initial publication; the aggregate data is transcribed from historical experiment summaries.
+
+## Reproducibility roadmap
+
+- [x] Publish aggregate quality and throughput data with sample denominators.
+- [x] Separate cold and warm long-context trials, including unsuccessful output generation.
+- [x] Document runtime versions, reasoning budgets, observed regressions and source manifest.
+- [ ] Release reviewed, per-trial raw logs and exact model revisions.
+- [ ] Publish an independently runnable benchmark harness with matched workloads.
+- [ ] Complete cold near-1M testing, multi-user load tests and frontend integration verification.
+
+Researchers interested in replication should report model architecture, quantization, runtime build, actual input/output token counts, cache state, decode throughput, TTFT and answer correctness separately. Do not compare an output-only speed against another system's end-to-end rate.
+
+## Repository structure
+
+```text
+.
+├── README.md
+├── README.zh-TW.md
+├── METHODOLOGY.md
+├── benchmarks.csv
+├── assets/
+│   ├── hero.svg
+│   ├── throughput.svg
+│   ├── quality.svg
+│   └── context-latency.svg
+├── data/
+│   ├── context-trials.csv
+│   └── mtp-sweep.csv
+└── docs/
+    ├── inference-optimization.md
+    ├── long-context.md
+    ├── model-evaluation.md
+    └── system-architecture.md
+```
+
+## Citation
+
+If referencing these results, cite the repository title, November 2026 experiment period and the relevant Git commit. Treat this as a non-peer-reviewed experimental report.
 
 ## References
 
