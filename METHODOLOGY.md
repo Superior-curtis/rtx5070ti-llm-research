@@ -17,7 +17,7 @@ Data transcribed from local experiment summaries dated November 18–23, 2026. N
 
 Decode tok/s is generated tokens per second, not full end-to-end speed. TTFT is time to first token. Cold and warm cache experiments must be reported separately. Configured context capacity is not the same as measured input length. Quality scores are fixed public subsets (GPQA 60, AIME 30, MMLU-Pro 70, MATH 60 where fully completed). Missing values are not zero. Different model architectures and quantizations are not controlled equivalents. No official Artificial Analysis Intelligence Index or proprietary-model parity claim is made.
 
-For reproducibility, publish reviewed raw trial records and exact runtime versions in a later release. The initial release is an aggregate report, not a fully reproducible benchmark suite.
+For reproducibility, publish reviewed raw trial records and exact runtime versions in a later release. The initial release was an aggregate report. The expanded release includes six historical per-trial metric extracts and a reference harness, but remains short of a fully reproducible historical benchmark suite.
 
 
 ## Published files and measurement grain
@@ -33,4 +33,10 @@ All values were transcribed from the laboratory summaries rather than inferred f
 
 ## Reproducibility status
 
-This release publishes enough detail to understand the observed trade-offs and reproduce the analysis of the published aggregates, but not enough to independently rerun every experiment. Raw logs and test harnesses still require review before redistribution. References are from local experiment records and have not been independently revalidated.
+This release publishes enough detail to understand the observed trade-offs and reproduce the analysis of the published aggregates, but not enough to independently rerun every experiment. Unfiltered raw logs and historical test harnesses still require review before redistribution. References are from local experiment records and have not been independently revalidated.
+
+## Per-trial release and verification
+
+[Trial manifest](data/trials/README.md): 155 rows from six historical JSONL files. Each source line is represented by an allowlisted record; numeric precision and null/boolean fields are preserved. Free text is omitted and only predefined categorical strings are allowed. Re-fetching all six published files confirmed their row counts and reproduced the NInfer long-output median (130.26307445610155 tok/s), Swift reasoning-level scores (17/24, 17/24, 18/24, 18/24), and thinking-budget scores (5/8, 7/8, 7/8).
+
+[Runtime manifest](docs/runtime-manifest.md) records available historical revision identifiers. [Reference harness](reproduce/benchmark.py) is newly authored and passed its offline self-test on the original Windows experiment PC using portable Python 3.12. It has not been validated against a live model endpoint. These checks do not independently verify historical answer correctness or all benchmark trials.
