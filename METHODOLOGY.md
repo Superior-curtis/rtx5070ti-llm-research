@@ -18,3 +18,19 @@ Data transcribed from local experiment summaries dated November 18–23, 2026. N
 Decode tok/s is generated tokens per second, not full end-to-end speed. TTFT is time to first token. Cold and warm cache experiments must be reported separately. Configured context capacity is not the same as measured input length. Quality scores are fixed public subsets (GPQA 60, AIME 30, MMLU-Pro 70, MATH 60 where fully completed). Missing values are not zero. Different model architectures and quantizations are not controlled equivalents. No official Artificial Analysis Intelligence Index or proprietary-model parity claim is made.
 
 For reproducibility, publish reviewed raw trial records and exact runtime versions in a later release. The initial release is an aggregate report, not a fully reproducible benchmark suite.
+
+
+## Published files and measurement grain
+
+| File | Grain | Notes |
+|---|---|---|
+| `benchmarks.csv` | One row per configuration | Aggregate quality numerators/denominators and synthetic decode speeds; mixed output lengths |
+| `data/context-trials.csv` | One row per reported long-context trial | Input, cached and output tokens; decode, TTFT, wall time; blank means unrecorded in summary |
+| `data/mtp-sweep.csv` | One row per draft-count/input-size experiment | 1,024 generated tokens per row; stock CUDA, IQ3_S, Q8 K/V |
+| `docs/` | Narrative by experiment family | Runtime versions, model differences, failure cases, and interpretation |
+
+All values were transcribed from the laboratory summaries rather than inferred from file names. The files are not raw logs; some row fields remain unreported. For comparisons that require equivalent tasks, replay the same prompt set, generation cap, sampling parameters, reasoning budget, cache condition and model revision. Separate speed, final-answer correctness, visible-answer availability, and request errors.
+
+## Reproducibility status
+
+This release publishes enough detail to understand the observed trade-offs and reproduce the analysis of the published aggregates, but not enough to independently rerun every experiment. Raw logs and test harnesses still require review before redistribution. References are from local experiment records and have not been independently revalidated.
